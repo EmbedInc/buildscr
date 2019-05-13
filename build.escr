@@ -1,0 +1,37 @@
+//   Build everything from this source directory.
+//
+//   This source directory contains scripts used for building software.  These
+//   are copied into the (cog)bat directory if it exists, or the (cog)com
+//   directory otherwise.
+//
+var new destdir string       //destination directory
+var new dest string          //destination file name
+
+//   Set DESTDIR to the destination directory.  This will be the Embed BAT
+//   directory if it exists, otherwise the Embed COM directory.
+//
+set destdir "(cog)bat"
+if [not [exist destdir fnam]] then
+  set destdir "(cog)com"
+  if [not [exist destdir fnam]] then
+    show "Embed software not installed, or the installation is corrupted."
+    stop 3
+    endif
+  endif
+
+//   Loop thru all the files in this directory.  Install any with names that
+//   start with "SCR_".
+//
+dir "(cog)source/buildscr"
+loop dir "." file
+  if [<> [substr 1 4 [dent]] "src_"] then //not the right file name ?
+    repeat
+    endif
+  set dest [str destdir "/" [dent]] //make destination file name
+  if [exist dest fnam] then  //destination file already exists ?
+    if [= [file dtm dest] [file dtm [dent]]] then //same file ?
+      repeat
+      endif
+    endif
+  run "copyt.exe -from " [dent] " -to " dest
+  endloop

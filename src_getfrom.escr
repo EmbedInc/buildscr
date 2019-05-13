@@ -1,0 +1,192 @@
+//   SRC_GETFROM srcdir [subdir] fnam [tab1 ... tabN]
+//
+//   Copy a source file from its source directory into the current working
+//   directory.  The command line parameters are:
+//
+//     SRCDIR  -  The name of the Embed source directory where the official copy
+//       of the file is stored.  For example, if SRCDIR is "blah", then the file
+//       is within (cog)source/blah.
+//
+//     SUBDIR  -  Optional subdirectory within the source directory.  If this is
+//       present, it overrides the BUILDNAME environment variable.
+//
+//     FNAM  -  The leafname of the source file.
+//
+//     TAB1 ... TABn  -  Tab stops for converting tab characters in the source
+//       file to spaces.  Each of these parameters must be a integer number.
+//       The list of tab stops will be passed to the COPYA program after the
+//       -TABS command line option.  See the COPYA documentation file for
+//       details of how the tab stops will be interpreted.
+//
+//   The following environment variables can effect the operation of this
+//   script:
+//
+//     BUILDNAME  -  Sub-directory name
+//
+//       If present and not the empty string, this is the directory path the
+//       source file is in within its source directory.  This is overridden by
+//       the SUBDIR command line argument, if present.
+//
+//     DBG_SOURCE  -  Debug source directory name
+//
+//       If this variable exists, source files will be taken from that
+//       directory, if present, instead of the official source.
+//
+//     DBG_PROMOTE  -  Update official version from actual soruce file.
+//
+//       If DBG_SOURCE exists and this variable is "true", any source files
+//       taken from the debug source directory will be moved to the official
+//       source directory identified by the first command line argument.  The
+//       source files will be removed from the debug source directory.  This
+//       variable has no effect unless DBG_SOURCE exists.
+//
+//   If the indicated source file does not exist, then a copy of it is
+//   guaranteed not to exist in the current directory when this script returns.
+//
+var new srcname string       //generic name of SOURCE (and src) directory
+var new lnam string          //source file leaf name
+var new tabs string          //-TABS parameters string for COPYA
+var new subd string          //source subdirectory when not empty
+var new fnam string          //pathname of source file
+var new pnam string          //pathname of where to write to on promote
+var new arg integer = 1      //next command line argument to get
+var new ii integer           //scratch integer
+var new b bool               //scratch boolean
+var new s string             //scratch string
+var new tnam string          //scratch file system pathname
+//
+//   Handle the command line parameters.  This section will set:
+//
+//     SRCNAME  -  Generic name of the SOURCE and SRC directories.
+//
+//     SUBD  -  Subdirectory within SOURCE directory.
+//
+//     LNAM  -  Leaf name of the source file.
+//
+//     TABS  -  The "-tabs ..." command line parameters for COPYA.  This is the
+//       empty string if no tab stops were specified.  If filled in, it will
+//       start with a space.
+//
+set subd [evar "buildname"]  //get default subdirectory name, if any
+
+set srcname [unquote [qstr [arg [1+ arg]]]] //get SRCDIR
+if [= srcname ""] then
+  show "SRC_GETFROM argument 1 missing.  Must be source dir name."
+  stop 3
+  endif
+
+set lnam [unquote [qstr [arg [1+ arg]]]] //get next, assume FNAM
+if [= lnam ""] then
+  show "No source file specified to SRC_GETFROM."
+  stop 3
+  endif
+
+if [exist arg arg] then      //at least one more argument exists ?
+  set s [unquote [qstr [arg arg]]] //get this next argument into S
+  if [not [isint [chars s]]] then //this is actually FNAM argument ?
+    set subd lnam            //previous FNAM was actually SUBDIR
+    set lnam s               //set real file name
+    set arg [+ arg 1]        //don't interpret this arg as tab stop
+    endif
+  loop                       //loop over all remaining command line arguments
+    if [not [exist arg arg]] then //exhausted the command line parameters ?
+      quit                   //TABS is all set
+      endif
+    if [not [isint [arg arg]]] then //not a valid tab stop ?
+      show """" [qstr [arg arg]] """ is not a valid tab stop"
+      stop 3
+      endif
+    set ii [arg [1+ arg]]    //get this tab stop value
+    if [= [slen tabs] 0] then //first tabs argument ?
+      set tabs " -tabs"
+      endif
+    set tabs [str tabs " " ii] //append as separate argument
+    endloop                  //back to get next command line argument
+  endif                      //end of third argument exists
+//
+//   Delete the destination file.  If something fails later, this file shouldn't
+//   exist.
+//
+if [exist lnam fnam] then    //the destination file exists ?
+  run "cmd /Q /D /C del " lnam //delete it
+  endif
+//
+//   Determine the pathname of the source file, and the pathname to write it to
+//   on promote.  The following variables will be set:
+//
+//     FNAM  -  Pathname of the source file to actually use.
+//
+//     PNAM  -  Pathname to write the source file to on promote.
+//
+set fnam [tnam "(cog)source/" srcname "/" lnam] //init to file directly in source dir
+set pnam fnam                //init promote pathname to this
+
+set tnam [tnam "(cog)source/" srcname "/win32/" lnam] //check for WIN32 version, hack for host source
+if [exist tnam fnam] then
+  set fnam tnam
+  set pnam tnam
+  endif
+
+if [<> subd ""] then         //source subdirectory structure in use ?
+  set tnam [tnam "(cog)source/" srcname "/" subd "/" lnam] //source file in subdirectory
+  set b [exist tnam fnam]    //source file exists in subdirectory ?
+  if b then
+    set fnam tnam            //source file is in the subdirectory
+    endif
+  if [not b] then            //doesn't exist, check name for build name match
+    set ii [slen subd]       //length of build name
+    set s [substr 1 ii lnam] //get leading part of source file name
+    set b [= s subd]         //source file name starts with build name ?
+    endif
+  if b then                  //promote into subdirectory ?
+    set pnam tnam
+    endif
+  endif
+
+set tnam [evar "dbg_source"] //get debug source dir, if enabled
+if [<> tnam ""] then         //debug source dir is in use ?
+  set tnam [tnam tnam "/" lnam] //source pathname in dbg source dir
+  if [exist tnam fnam] then  //source file exists in dbg source dir ?
+    set fnam tnam            //use source file from dbg source dir
+    endif
+  endif
+//
+//   Copy the source file into the current directory.  FNAM is the treename of
+//   the source file.
+//
+if [not [exist fnam fnam]] then //no source file ?
+  set s "No such source file: "
+  set s [str s [ucase srcname] " > "]
+  if [<> subd ""] then
+    set s [str s [ucase subd] " > "]
+    endif
+  show s lnam
+  stop 3
+  endif
+
+run 'copya -in "' fnam '" -out "' lnam '"' tabs
+if [> EXITSTATUS 0] then
+  stop EXITSTATUS
+  endif
+//
+//   Promote the source file, if this is enabled and appropriate.  PNAM is the
+//   treename of where to promote the source file to.
+//
+block                        //quit this block to not promote
+  if [<> [ucase [evar "dbg_promote"]] "TRUE"] then //promote not enabled ?
+    quit
+    endif
+  if [= fnam pnam] then      //would promote to the same place ?
+    quit
+    endif
+  //
+  //   Do the promotion.
+  //
+  show "Promoting " lnam
+  run 'copya "' fnam '" "' pnam '"' tabs
+  if [> EXITSTATUS 0] then
+    show "Promote failed, status " EXITSTATUS
+    stop EXITSTATUS
+    endif
+  run 'cmd /Q /D /C del "' fnam '"' //delete the source file
+  endblock
