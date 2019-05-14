@@ -21,6 +21,7 @@ call src_get %1 %2.linkp30
 call treename_var (cog)src/%1/%2.libp30 libs
 set comargs=-omf=elf -o %2.elf
 set comargs=%comargs% -T %2.linkp30
+if not "%heapsize%"=="" set comargs=%comargs% --heap %heapsize%
 
 if "%using_c30%"=="true" goto :c30libs
 if "%using_xc16%"=="true" goto :xc16libs
