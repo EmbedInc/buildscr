@@ -1,0 +1,67 @@
+//   SRC_SEQNAME
+//
+//   Writes the generic treename for the sequence file of the current build to
+//   standard output.  This will be the full treename up to but not including
+//   the ".seq" suffix.
+//
+//   The following environment variables are used:
+//
+//     SRCDIR  -  The generic name of the Embed SOURCE directory that contains
+//       the source code.
+//
+//     FWNAME  -  Name of the firmware being built.  This will be the generic
+//       leafname of the .seq file.
+//
+//       If this variable does not exist, then it will default to BUILDNAME,
+//       which then must exist.
+//
+//     BUILDNAME  -  Optional build name.  This is the name of the subdirectory
+//       within the source directory where the source code is found.  If this
+//       variable does not exist, then the source code is assumed to be in the
+//       top level of the SRCDIR source directory.
+//
+//       When a subdirectory is used for source specific to this build, then the
+//       sequence files will be within the SEQ directory in the subdirectory.
+//
+var new srcdir string = [evar "srcdir"]
+var new fwname string = [evar "fwname"]
+var new buildname string = [evar "buildname"]
+var new source string        //full treename of SOURCE directory
+var new tnam string          //scratch treename
+
+if [= srcdir ""] then
+  show "SRCDIR not set"
+  stop 3
+  endif
+set source [tnam "(cog)source/" srcdir]
+if [not [exist source fnam]] then
+  show "Source directory " [ucase srcdir] " does not exist"
+  stop 3
+  endif
+
+if [= fwname ""] then        //default "firmware" name to build name
+  set fwname buildname
+  endif
+if [= fwname ""] then
+  show "No firmware or build name specified"
+  stop 3
+  endif
+
+if [= buildname ""] then     //using flat source structure ?
+  show [tnam source "/" fwname]
+  stop 0
+  endif
+//
+//   Using "new" source structure where each build is in its own subdirectory
+//   within the Embed source directory.  In this case, the sequence files are
+//   stored another layer down in the SEQ directory.
+//
+set tnam [tnam source "/" buildname]
+if [not [exist tnam fnam]] then //need to create source subdirectory ?
+  run 'cmd /Q /D /C mkdir "' tnam '"'
+  endif
+set tnam [tnam tnam "/seq"]
+if [not [exist tnam fnam]] then //need to create SEQ directory ?
+  run 'cmd /Q /D /C mkdir "' tnam '"'
+  endif
+show [tnam tnam "/" fwname]

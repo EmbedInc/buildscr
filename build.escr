@@ -6,6 +6,7 @@
 //
 var new destdir string       //destination directory
 var new dest string          //destination file name
+var new gnam string          //generic name of file
 
 //   Set DESTDIR to the destination directory.  This will be the Embed BAT
 //   directory if it exists, otherwise the Embed COM directory.
@@ -19,14 +20,21 @@ if [not [exist destdir fnam]] then
     endif
   endif
 
-//   Loop thru all the files in this directory.  Install any with names that
-//   start with "SCR_".
+//   Loop thru all the files in this directory.  Install all ".bat" and ".escr"
+//   files.
 //
 dir "(cog)source/buildscr"
 loop dir "." file
-  if [<> [substr 1 4 [dent]] "src_"] then //not the right file name ?
+  if [= [dent] "build.escr"] then
     repeat
     endif
+  set gnam [lnam [dent] ".bat" ".escr"]
+  if [= [slen gnam] [slen [dent]]] then
+    repeat
+    endif
+  //
+  //   Install this file.
+  //
   set dest [str destdir "/" [dent]] //make destination file name
   if [exist dest fnam] then  //destination file already exists ?
     if [= [file dtm dest] [file dtm [dent]]] then //same file ?
