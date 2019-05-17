@@ -40,6 +40,9 @@ if %VisualStudioVersion%==6 (
 if %VisualStudioVersion%==2014 (
   set opts=%opts% /RTCcsu /Z7
   )
+if %VisualStudioVersion%==2017 (
+  set opts=%opts% /RTCcsu /Z7
+  )
 call extpath_var msvc/set_vars.bat tnam
 call "%tnam%"
 "%compiler%" "%~1.c" %opts%
