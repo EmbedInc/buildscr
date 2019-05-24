@@ -25,9 +25,15 @@ if [not [exist destdir fnam]] then
 //
 dir "(cog)source/buildscr"
 loop dir "." file
+  //
+  //   Check for specific files to not install.
+  //
   if [= [dent] "build.escr"] then
     repeat
     endif
+  //
+  //   Ignore this file if not .BAT or .ESCR.
+  //
   set gnam [lnam [dent] ".bat" ".escr"]
   if [= [slen gnam] [slen [dent]]] then
     repeat
