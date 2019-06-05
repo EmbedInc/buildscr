@@ -10,4 +10,7 @@ for /f "delims=" %%a in ('treename "(cog)source/%~1"') do cd /d %%a
 if errorlevel 1 exit /b 3
 set debug=
 l
-if exist .git git status -s -b
+if exist .git (
+  copya -s "" -list
+  git status -s -b
+  )
