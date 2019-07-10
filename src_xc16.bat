@@ -30,17 +30,13 @@ set comargs=%comargs% -Wall
 set comargs=%comargs% -mno-eds-warn
 set comargs=%comargs% -no-legacy-libc
 
-set dbg_parm=5
-if "%dbg_promote%"=="true" set dbg_parm=0
-if not "%dbg_level%"=="" set dbg_parm=%dbg_level%
-if "%dbg_source%"=="" set dbg_parm=0
-if not "%dbg_parm%"=="0" goto debugging
+if "%debug_icd%"=="true" goto :debugging
 
 rem
 rem   Production build.
 rem
 "%xc16dir%\bin\xc16-gcc" %comargs% -O3 -Os %2.c -o %2_c.o
-goto done_compile
+goto :done_compile
 
 rem
 rem   Debug build
