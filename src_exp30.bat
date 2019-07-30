@@ -50,8 +50,12 @@ set libs=%libs% "%XC16Dir%\lib\libfastm-elf.a"
 set comargs=%comargs% -Map %2.map --stackguard=0
 
 echo Linking
-rem echo "%dspicdir%\bin\xc16-ld" %comargs% -( %libs% -)
-"%dspicdir%\bin\xc16-ld" %comargs% -( %libs% -)
-if exist %2.elf "%dspicdir%\bin\xc16-bin2hex" -omf=elf %2.elf
+
+call extpath_var mplab/link16.exe tnam
+"%tnam%" %comargs% -( %libs% -)
+
+call extpath_var mplab/bin_hex16.exe tnam
+if exist %2.elf "%tnam%" -omf=elf %2.elf
+
 if not exist %2.hex prepic -in "(cog)source/pic/unseq.aspic" -out /temp/unseq -s srcdir %1 -s fwname %2
 if not exist %2.hex exit /b 3

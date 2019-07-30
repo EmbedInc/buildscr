@@ -8,17 +8,6 @@ rem   of the source file.  The file will be copied into the approriate
 rem   SRC directory and assembled.  A ".o" object output file will
 rem   be produced if no errors are found.
 rem
-rem   The assembler constant DBG_LEVEL is always created.  It is set to
-rem   0 for a production build (no DBG_SOURCE environment variable, or
-rem   DBG_PROMOTE environment variable set to "true").  The default for
-rem   a debug build is 5, although this will be overridden with the
-rem   DBG_LEVEL environment variable value if present.
-rem
-rem   The DSPICDIR environment variable must be set to the dsPIC tools
-rem   installation directory.  This directory contains the BIN subdirectory
-rem   where the executables are, the SUPPORT > INC subdirectory where
-rem   the include files are, etc.
-rem
 setlocal
 
 echo %~2.dspic
@@ -41,8 +30,8 @@ del %~2.dspic
 set opts=-p%pictype%
 set opts=%opts% -omf=elf
 set opts=%opts% -ahilmns=%2.lst
-set opts=%opts% -I "%dspicdir%\support\inc"
 set opts=%opts% -g
 set opts=%opts% -o %2.o %2.as
 
-"%dspicdir%\bin\xc16-as" %opts%
+call extpath_var mplab/asm16.exe tnam
+"%tnam%" %opts%
