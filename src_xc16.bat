@@ -13,6 +13,7 @@ rem   the same names.  For example the input file "mctrl_pwm.xc16" will result
 rem   in the output file "mctrl_pwm_c.o".
 rem
 setlocal
+call extpath_var mplab/ccomp16.exe ccomp
 
 echo %2.xc16
 call src_get_c "%~1" %2.xc16
@@ -35,13 +36,13 @@ if "%debug_icd%"=="true" goto :debugging
 rem
 rem   Production build.
 rem
-"%xc16dir%\bin\xc16-gcc" %comargs% -O3 -Os %2.c -o %2_c.o
+"%ccomp%" %comargs% -O3 -Os %2.c -o %2_c.o
 goto :done_compile
 
 rem
 rem   Debug build
 rem
 :debugging
-"%xc16dir%\bin\xc16-gcc" %comargs% -g %2.c -o %2_c.o
+"%ccomp%" %comargs% -g %2.c -o %2_c.o
 
 :done_compile

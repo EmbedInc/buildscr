@@ -23,7 +23,6 @@ set comargs=-omf=elf -o %2.elf
 set comargs=%comargs% -T %2.linkp30
 if not "%heapsize%"=="" set comargs=%comargs% --heap %heapsize%
 
-if "%using_c30%"=="true" goto :c30libs
 if "%using_xc16%"=="true" goto :xc16libs
 rem
 rem   Not using C.
@@ -31,20 +30,13 @@ rem
 set comargs=%comargs% %2_strt.o
 goto :done_c
 rem
-rem   Using C30
-rem
-:c30libs
-set libs=%libs% "%C30Dir%\lib\libpic30-elf.a"
-set libs=%libs% "%C30Dir%\lib\libc-elf.a"
-set libs=%libs% "%C30Dir%\lib\libm-elf.a"
-goto :done_c
-rem
 rem   Using XC16
 rem
 :xc16libs
-set libs=%libs% "%XC16Dir%\lib\libpic30-elf.a"
-set libs=%libs% "%XC16Dir%\lib\libc-elf.a"
-set libs=%libs% "%XC16Dir%\lib\libfastm-elf.a"
+call extpath_var mplab/lib16 clibs
+set libs=%libs% "%clibs%\libpic30-elf.a"
+set libs=%libs% "%clibs%\libc-elf.a"
+set libs=%libs% "%clibs%\libfastm-elf.a"
 :done_c
 
 set comargs=%comargs% -Map %2.map --stackguard=0
