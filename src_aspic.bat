@@ -50,11 +50,4 @@ if "%~9"=="" (
   set p9="%~9"
   )
 
-prepic %2.aspic
-
-if "%asmpic_serv%"=="true" (
-  runon localhost asmpic "(cog)src/%~1/%~2.asm" /c- /o+ %p3% %p4% %p5% %p6% %p7% %p8% %p9%
-  ) else (
-  rem echo Running: asmpic "(cog)src/%~1/%~2.asm" /c- /o+ %p3% %p4% %p5% %p6% %p7% %p8% %p9%
-  asmpic "(cog)src/%~1/%~2.asm" /c- /o+ %p3% %p4% %p5% %p6% %p7% %p8% %p9%
-  )
+asmpic "(cog)src/%~1/%~2.aspic" /c- /l- /o+ %p3% %p4% %p5% %p6% %p7% %p8% %p9%

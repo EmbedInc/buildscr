@@ -1,0 +1,44 @@
+//   BUILD_PROGS
+//
+//   Build all the host programs from all the GIT repositories in the SOURCE
+//   tree.  Program are built from each repository by running the BUILD_PROGS
+//   script, if it exists.
+//
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Subroutine REPO dir
+//
+//   Handle the GIT repository DIR.  DIR is the full pathname of the repository.
+//
+subroutine repo
+  dir [arg 1]
+  if [exist "build_progs.bat" fnam] then
+    show
+    show "---REPOSITORY---  " [dir]
+    run "build_progs.bat"
+    endif
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Subroutine DOTREE dir
+//
+//   Find and handle GIT repositories in the tree DIR.  DIR is a string.
+//
+subroutine dotree
+  loop dir [arg 1] dir
+    if [= [dent] ".git"]
+      then
+        call repo [dent dir] //process this repository
+      else
+        call dotree:+1 [dent tnam]
+      endif
+    endloop
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Start of main routine.
+//
+call dotree "(cog)source"

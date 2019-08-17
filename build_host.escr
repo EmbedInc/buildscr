@@ -1,0 +1,7 @@
+//   BUILD_HOST
+//
+//   Build all the host libraries and executable programs from all the GIT
+//   repositories in the SOURCE tree.
+//
+run "cmd /c build_libs"
+run "cmd /c build_progs"

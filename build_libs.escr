@@ -1,0 +1,57 @@
+//   BUILD_LIBS
+//
+//   Build all the host libraries from all the GIT repositories in the SOURCE
+//   tree.
+//
+var new nn integer = 0       //init number of repos built
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Subroutine REPO dir
+//
+//   Handle the GIT repository DIR.  DIR is the full pathname of the repository.
+//
+subroutine repo
+  dir [arg 1]
+  if [exist "build_lib.bat" fnam] then
+    loop with ii from 1 to nn
+      if [= built[chars ii] [dir]] then //already built this lib ?
+        return
+        endif
+      endloop
+    set nn [+ nn 1]          //count one more library being built
+    const built[chars nn] string = [dir]
+    show
+    show "---REPOSITORY---  " [dir]
+    run "build_lib.bat"
+    endif
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Subroutine DOTREE dir
+//
+//   Find and handle GIT repositories in the tree DIR.  DIR is a string.
+//
+subroutine dotree
+  loop dir [arg 1] dir
+    if [= [dent] ".git"]
+      then
+        call repo [dent dir] //process this repository
+      else
+        call dotree:+1 [dent tnam]
+      endif
+    endloop
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Start of main routine.
+//
+call repo "(cog)/source/sys"
+call repo "(cog)/source/util"
+call repo "(cog)/source/string"
+call repo "(cog)/source/file"
+call repo "(cog)/source/stuff"
+
+call dotree "(cog)source"
