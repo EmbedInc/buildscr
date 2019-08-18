@@ -3,12 +3,11 @@ rem
 rem   PICVERSION
 rem
 rem   Uses the files from the latest built version of specific PIC firmware
-rem   to make the named HEX and MAP files.
+rem   to make the named HEX and MAP files.  This releases the current version.
+rem   Future builds will be of the next sequential version.
 rem
-rem   The environment must be set up for a particular PIC project, such as is
-rem   done by the SOURCE_DIR script.  In that case the latest HEX file built for
-rem   that PIC project is made the official version, and the version is
-rem   incremented so that subsequent builds are for the new version.
+rem   This script must be run in the source directory where the firmware is
+rem   built from.
 rem
 setlocal
 
@@ -27,7 +26,6 @@ if "%fwname%"=="" (
   echo Environment not set for PIC firmware.
   exit /b 3
   )
-
 call treename_var "(cog)src/%srcdir%" tnam
 if not exist "%tnam%" (
   echo Environment not set for PIC firmware.
@@ -43,15 +41,21 @@ if not exist "%fwname%.map" (
   exit /b 3
   )
 
-call treename_var "(cog)source/%srcdir%/%buildname%/doc.txt" tnam
-if not "%buildname%"=="" (
-  copya -list -s "Promoting doc.txt --> fw_%fwname%.txt"
-  copya "%tnam%" "(cog)doc/fw_%fwname%.txt"
+call treename_var "%sourcedir%/doc.txt" tnam
+if not exist "%tnam%" (
+  echo No DOC.TXT file
+  exit /b 3
   )
 
-call progout_var "escr (cog)bat/src_seqname.escr" seq
-call progout_var "sequence %seq%" fwver
-call progout_var "sequence %seq%%fwver% -incr 0 -start 2" fwseq
+cd /d "%sourcedir%"
+if not exist seq (
+  echo No SEQ subdirectory
+  exit /b 3
+  )
+cd seq
+
+call progout_var "sequence -seq %fwname%" fwver
+call progout_var "sequence -seq %fwname%%fwver% -incr 0 -start 2" fwseq
 call progout_var "sum %fwseq% -1" fwseq
 if %fwver% leq 9 set fwver=0%fwver%
 
@@ -63,14 +67,8 @@ if "%fwseq%"=="" (
   )
 copya -s "" -list
 
-if not exist "%fwname%.hex" (
-  echo No HEX file.
-  exit /b 3
-  )
-if not exist "%fwname%.map" (
-  echo No MAP file.
-  exit /b 3
-  )
+call treename_var "(cog)src/%srcdir%" tnam
+cd /d "%tnam%"
 
 copya %fwname%.hex %fwname%%fwver%.hex
 copya %fwname%.map %fwname%%fwver%.map
@@ -80,16 +78,11 @@ if exist %fwname% (
   )
 del %fwname%.hex
 del %fwname%.map
+
 dir %fwname%*.hex /w /o-gn
 dir %fwname%*.map /w /o-gn
 
-if not "%fwname%"=="man" goto done_man
-hex_recv %fwname%%fwver%.hex
-dir %fwname%*.mch /w /o-gn
-:done_man
-
-call godir "(cog)source/%srcdir%"
-if not "%buildname%"=="" cd "%buildname%"
+cd /d "%sourcedir%"
 
 rem   Copy the HEX and MAP files into the HEX subdirectory, if it exists.  All
 rem   older versions will be delted.
@@ -98,3 +91,8 @@ if not exist hex goto :done_hexdir
 copya (cog)src/%srcdir%/%fwname%%fwver%.hex hex/%fwname%%fwver%.hex
 cd ..
 :done_hexdir
+
+cd /d "%sourcedir%"
+copya -s "" -list
+copya -list -s "Promoting doc.txt --> fw_%fwname%.txt"
+copya doc.txt "(cog)doc/fw_%fwname%.txt"
