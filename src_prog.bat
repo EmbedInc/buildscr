@@ -156,20 +156,20 @@ rem
 copyt %2.exe (cog)com/%2.exe
 
 if exist "z:\embed\com" copyt "%2.exe" "z:\embed\com\%2.exe"
-if exist "x:\embed\com" copyt "%2.exe" "x:\embed\com\%2.exe"
+if exist "y:\embed\com" copyt "%2.exe" "y:\embed\com\%2.exe"
 del %2.exe
 if exist "%homedrive%%homepath%\com_dbg\%2.exe" del "%homedrive%%homepath%\com_dbg\%2.exe"
 
 call treename_var "(cog)source/%~1/%buildname%/%2.txt" tnam
 if not exist "%tnam%" goto :done_doc
 copya "%tnam%" "(cog)doc/%2.txt"
-if exist "z:\embed\doc" copya "%tnam%"" "z:\embed\doc\%tnam%"
-if exist "x:\embed\doc" copya "%tnam%"" "x:\embed\doc\%tnam%"
+if exist "z:\embed\doc" copya "%tnam%" "z:\embed\doc\%2.txt"
+if exist "y:\embed\doc" copya "%tnam%" "y:\embed\doc\%2.txt"
 :done_doc
 
 call treename_var "(cog)source/%~1/%buildname%/%2_prog.msg" tnam
 if not exist "%tnam%" goto :done_msg
 copya "%tnam%" "(cog)env/%2_prog.msg"
-if exist "z:\embed\env" copya "%tnam%"" "z:\embed\env\%tnam%"
-if exist "x:\embed\env" copya "%tnam%"" "x:\embed\env\%tnam%"
+if exist "z:\embed\env" copya "%tnam%" "z:\embed\env\%2_prog.msg"
+if exist "y:\embed\env" copya "%tnam%" "y:\embed\env\%2_prog.msg"
 :done_msg
