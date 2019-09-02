@@ -106,40 +106,40 @@ set arg9=%9
 :done9
 
 call src_pas %1 %2 %dbg%
-if not exist "%2.obj" goto alldone
+if not exist "%2.obj" goto :eof
 
 if not "%arg3%"=="" (
   call src_pas "%~1" %arg3% %dbg%
-  if not exist "%3.obj" goto alldone
+  if not exist "%3.obj" goto :eof
   )
 if not "%arg4%"=="" (
   call src_pas "%~1" %arg4% %dbg%
-  if not exist "%4.obj" goto alldone
+  if not exist "%4.obj" goto :eof
   )
 if not "%arg5%"=="" (
   call src_pas "%~1" %arg5% %dbg%
-  if not exist "%5.obj" goto alldone
+  if not exist "%5.obj" goto :eof
   )
 if not "%arg6%"=="" (
   call src_pas "%~1" %arg6% %dbg%
-  if not exist "%6.obj" goto alldone
+  if not exist "%6.obj" goto :eof
   )
 if not "%arg7%"=="" (
   call src_pas "%~1" %arg7% %dbg%
-  if not exist "%7.obj" goto alldone
+  if not exist "%7.obj" goto :eof
   )
 if not "%arg8%"=="" (
   call src_pas "%~1" %arg8% %dbg%
-  if not exist "%8.obj" goto alldone
+  if not exist "%8.obj" goto :eof
   )
 if not "%arg9%"=="" (
   call src_pas "%~1" %arg9% %dbg%
-  if not exist "%9.obj" goto alldone
+  if not exist "%9.obj" goto :eof
   )
 set debug=
 if "%dbg%"=="-dbg" set debug=/debug
 call src_link %2 %2 %debug% %arg3% %arg4% %arg5% %arg6% %arg7% %arg8% %arg9%
-if not exist %2.exe goto alldone
+if not exist %2.exe goto :eof
 if "%dbg%"=="" goto :cp_global
 
 rem   Private build.
