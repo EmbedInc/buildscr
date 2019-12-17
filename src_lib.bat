@@ -1,6 +1,6 @@
 @echo off
 rem
-rem   SRC_LIB <src dir lnam> <library name>
+rem   SRC_LIB <src dir lnam> <library name> [private]
 rem
 rem   Build the indicated linkable library.  The first argument is the leafname
 rem   of the source directory.  The second is the generic name of the library to
@@ -11,6 +11,12 @@ rem
 rem   Normally a DLL and its library is also created.  When the environment
 rem   variable NO-DLL exists and is set to "true", the DLL and its library are
 rem   not created.
+rem
+rem   The optional third argument "private" indicates this is a private library
+rem   that is not to be exported to LIB.  This would be the case, for example,
+rem   when the library is really just various modules of a large program.  The
+rem   third argument, when present, must be exactly "private".  The library file
+rem   will be left in the SRC directory and not moved anywhere.
 rem
 setlocal
 set no-dll=true
@@ -23,11 +29,21 @@ if exist "%source%\%2_lib.mlist" (
     copya %2.mlist %2_lib.mlist
   )
 
+set private=
+if not "%~3"=="" (
+  if not "%~3"=="private" (
+    echo Bad argument "%~3".
+    exit /b 3
+    )
+  set private=true
+  )
+
 rem ************************************
 rem
 rem   Build the DLL.
 rem
 if "%no-dll%"=="true" goto :no_dll1
+if "%private%"=="true" goto :no_dll1
 
 if exist %2.dll del del %2.dll
 if exist %2_dll.lib del %2_dll.lib
@@ -69,8 +85,13 @@ call "%tnam%"
 "%librarian%" /nologo /out:%2.lib @%2_lib.mlist
 endlocal
 
-if not exist %2.lib exit /b 3
+if exist %2.exp del %2.exp
+if not exist %2.lib (
+  echo Error building %2.lib
+  exit /b 3
+  )
 
+if "%private%"=="true" goto :eof
 if "%dbg_promote%"=="none" goto :eof
 if "%dbg_promote%"=="true" goto cp_global
 if not defined dbg_source goto cp_global
