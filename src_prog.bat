@@ -139,37 +139,9 @@ if not "%arg9%"=="" (
 set debug=
 if "%dbg%"=="-dbg" set debug=/debug
 call src_link %2 %2 %debug% %arg3% %arg4% %arg5% %arg6% %arg7% %arg8% %arg9%
+set debug=
 if not exist %2.exe goto :eof
-if "%dbg%"=="" goto :cp_global
 
-rem   Private build.
-rem
-echo "Private build"
-copyt %2.exe ~/com_dbg/%2.exe
-call treename_var "(cog)source/%~1/%buildname%/%2_prog.msg" tnam
-if exist "%tnam%" copya "%tnam%" "~/env_dbg/%2_prog.msg"
-goto :eof
-
-rem   Global build.
-rem
-:cp_global
-copyt %2.exe (cog)com/%2.exe
-
-if exist "z:\embed\com" copyt "%2.exe" "z:\embed\com\%2.exe"
-if exist "y:\embed\com" copyt "%2.exe" "y:\embed\com\%2.exe"
-del %2.exe
-if exist "%homedrive%%homepath%\com_dbg\%2.exe" del "%homedrive%%homepath%\com_dbg\%2.exe"
-
-call treename_var "(cog)source/%~1/%buildname%/%2.txt" tnam
-if not exist "%tnam%" goto :done_doc
-copya "%tnam%" "(cog)doc/%2.txt"
-if exist "z:\embed\doc" copya "%tnam%" "z:\embed\doc\%2.txt"
-if exist "y:\embed\doc" copya "%tnam%" "y:\embed\doc\%2.txt"
-:done_doc
-
-call treename_var "(cog)source/%~1/%buildname%/%2_prog.msg" tnam
-if not exist "%tnam%" goto :done_msg
-copya "%tnam%" "(cog)env/%2_prog.msg"
-if exist "z:\embed\env" copya "%tnam%" "z:\embed\env\%2_prog.msg"
-if exist "y:\embed\env" copya "%tnam%" "y:\embed\env\%2_prog.msg"
-:done_msg
+set private=
+if "%dbg%"=="-dbg" set private=private
+call src_exeput %2 %private%
