@@ -6,16 +6,16 @@ rem   Compile the Pascal language source file to produce an object file.  The
 rem   source file name argument must not contain the .PAS suffix.
 rem
 rem   The module will be compiled in debug mode if the "-dbg" command line
-rem   option is given, or the environment variable DEBUG_PC exists and is set to
+rem   option is given, or the environment variable DEBUG_VS exists and is set to
 rem   "true".
 rem
 setlocal
-if "%2"=="-dbg" set DEBUG_PC=true
+if "%2"=="-dbg" set DEBUG_VS=true
 if exist %~1.obj del %~1.obj
 if exist %~1.c del %~1.c
 
 set dbglev=0
-if "%DEBUG_PC%"=="true" set dbglev=1
+if "%DEBUG_VS%"=="true" set dbglev=1
 set arg2=
 if not "%2"=="-dbg" set arg2=%2
 
@@ -25,4 +25,4 @@ if errorlevel 1 exit /b 3
 call src_c_raw %~1
 if errorlevel 1 exit /b 3
 if not exist %~1.obj exit /b 3
-if not "%DEBUG_PC%"=="true" del %~1.c
+if not "%DEBUG_VS%"=="true" del %~1.c

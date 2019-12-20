@@ -6,12 +6,12 @@ rem   Compile C language source file to produce an object file.  The source file
 rem   name argument must not contain the .C suffix.
 rem
 rem   The module will be compiled in debug mode if the "-dbg" command line
-rem   option is given, or the environment variable DEBUG_PC exists and is set to
+rem   option is given, or the environment variable DEBUG_VS exists and is set to
 rem   "true".
 rem
 setlocal
-if "%2"=="-dbg" set DEBUG_PC=true
-if "%DEBUG_PC%"=="true" goto dbg
+if "%2"=="-dbg" set DEBUG_VS=true
+if "%DEBUG_VS%"=="true" goto dbg
 
 rem   Production compile.
 rem

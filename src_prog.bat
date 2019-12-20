@@ -24,7 +24,7 @@ setlocal
 call src_go "%~1"
 if exist %~2.exe del %~2.exe
 set dbg=
-if "%DEBUG_PC%"=="true" set dbg=-dbg
+if "%DEBUG_VS%"=="true" set dbg=-dbg
 
 if "%3"=="" (
   set arg3=

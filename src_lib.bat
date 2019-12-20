@@ -18,7 +18,7 @@ rem   when the library is really just various modules of a large program.  The
 rem   third argument, when present, must be exactly "private".  The library file
 rem   will be left in the SRC directory and not moved anywhere.
 rem
-rem   If the variable DEBUG_PC exists and is set to "true", then the library is
+rem   If the variable DEBUG_VS exists and is set to "true", then the library is
 rem   copied to the ~/com_dbg directory.  Otherwise, the library is copied to
 rem   the (cog)lib directory.  The "private" command line arguments overrides
 rem   both these, causing the library to not be copied anywhere.
@@ -97,7 +97,7 @@ if not exist %~2.lib (
   )
 
 if "%private%"=="true" goto :eof
-if not "%DEBUG_PC%"=="true" goto :cp_global
+if not "%DEBUG_VS%"=="true" goto :cp_global
 
 rem ****************************************************************************
 rem
