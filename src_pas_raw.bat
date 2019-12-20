@@ -2,30 +2,27 @@
 rem
 rem   SRC_PAS_RAW <source file name> [-dbg]
 rem
-rem   Compile the Pascal language source file to produce an object file.
-rem   The source file name argument must not contain the .PAS suffix.
+rem   Compile the Pascal language source file to produce an object file.  The
+rem   source file name argument must not contain the .PAS suffix.
 rem
-rem   The -dbg option causes the source file to be compiled for debugging.
-rem   Otherwise, the source file is compiled with full optimization.
+rem   The module will be compiled in debug mode if the "-dbg" command line
+rem   option is given, or the environment variable DEBUG_PC exists and is set to
+rem   "true".
 rem
 setlocal
-
-if exist %1.obj del %1.obj
-if exist %1.c del %1.c
+if "%2"=="-dbg" set DEBUG_PC=true
+if exist %~1.obj del %~1.obj
+if exist %~1.c del %~1.c
 
 set dbglev=0
+if "%DEBUG_PC%"=="true" set dbglev=1
 set arg2=
-set dbg=
-if "%2"=="-dbg" set dbglev=1
-if "%2"=="-dbg" set dbg=-dbg
 if not "%2"=="-dbg" set arg2=%2
 
-sst %1.pas -out %1 -local_ins -debug %dbglev% %arg2% %3 %4 %5 %6 %7 %8 %9
-if errorlevel 1 goto :eof
-call src_c_raw %1 %dbg%
-if errorlevel 1 goto :eof
+sst %~1.pas -out %~1 -local_ins -debug %dbglev% %arg2% %3 %4 %5 %6 %7 %8 %9
+if errorlevel 1 exit /b 3
 
-if "%2"=="-dbg" goto :dbg
-if not "%dbg_source%"=="" goto :dbg
-if exist %1.c del %1.c
-:dbg
+call src_c_raw %~1
+if errorlevel 1 exit /b 3
+if not exist %~1.obj exit /b 3
+if not "%DEBUG_PC%"=="true" del %~1.c

@@ -2,30 +2,29 @@
 rem
 rem   SRC_PROG <src dir lnam> <.pas top module name> [<mod 1> ... <mod N>] [-dbg]
 rem
-rem   Build an excutable program from its source module(s).  This
-rem   script is only suitable when the build procedure is simple.
-rem   Specifically, the following restrictions apply:
+rem   Build an excutable program from its source module(s).  This script is only
+rem   suitable when the build procedure is simple.  Specifically, the following
+rem   restrictions apply:
 rem
-rem     1 - The top source module and the executable file have the same
-rem         generic name.
+rem     1 - The top source module and the executable file have the same generic
+rem         name.
 rem
 rem     2 - All source modules are in Pascal and have a suffix of .pas
 rem
 rem     3 - There are no more than 7 additional source modules.
 rem
 rem   The first command line argument is the generic name of the source code
-rem   directory that all source files come from.  The second argument is
-rem   the generic name of the top source module and the executable.  The
-rem   remaining arguments, if any, are the generic names of additional
-rem   source modules.  These will be compiled and explicitly linked (no
-rem   library will be created) into the executable.
+rem   directory that all source files come from.  The second argument is the
+rem   generic name of the top source module and the executable.  The remaining
+rem   arguments, if any, are the generic names of additional source modules.
+rem   These will be compiled and explicitly linked (no library will be created)
+rem   into the executable.
 rem
 setlocal
-
-if exist %2.exe del %2.exe
+call src_go "%~1"
+if exist %~2.exe del %~2.exe
 set dbg=
-
-call src_go %1
+if "%DEBUG_PC%"=="true" set dbg=-dbg
 
 if "%3"=="" (
   set arg3=
