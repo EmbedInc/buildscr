@@ -11,5 +11,5 @@ rem
 if exist %2.h del %2.h
 call src_get %1 %2.insall.pas
 call src_get %1 %2.ins.pas
-sst %2.insall.pas -show_unused 0 -local_ins -ins %2.ins.pas
+sst %2.insall.pas -show_unused 0 -ins %2.ins.pas
 rename %2.insall.c %2.h

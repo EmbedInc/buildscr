@@ -19,7 +19,7 @@ if "%DEBUG_VS%"=="true" set dbglev=1
 set arg2=
 if not "%2"=="-dbg" set arg2=%2
 
-sst %~1.pas -out %~1 -local_ins -debug %dbglev% %arg2% %3 %4 %5 %6 %7 %8 %9
+sst %~1.pas -out %~1 -debug %dbglev% %arg2% %3 %4 %5 %6 %7 %8 %9
 if errorlevel 1 exit /b 3
 
 call src_c_raw %~1
