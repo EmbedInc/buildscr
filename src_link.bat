@@ -10,6 +10,8 @@ rem
 setlocal
 echo Linking executable %1
 
+if "%~3"=="/debug" set debug_vs=true
+
 if exist %1.exe del %1.exe
 if exist %1.lnk del %1.lnk
 if exist %1.lib del %1.lib
@@ -22,6 +24,10 @@ echo /out:%1.exe >>%1.lnk
 echo /incremental:no >>%1.lnk
 echo /subsystem:console,5.1 >>%1.lnk
 echo %2.obj >>%1.lnk
+
+if "%debug_vs%"=="true" (
+  if not "%~3"=="/debug" echo /debug >>%1.lnk
+  )
 if not "%~3"=="" echo %3 >>%1.lnk
 if not "%~4"=="" echo %4 >>%1.lnk
 if not "%~5"=="" echo %5 >>%1.lnk
@@ -43,7 +49,7 @@ if exist %1.lib del %1.lib
 if exist %1.ilk del %1.ilk
 if exist %1.exp del %1.exp
 
-if "%~3"=="/debug" goto dbg
+if "%debug_vs%"=="true" goto dbg
 if exist %1.pdb del %1.pdb
 if errorlevel 1 goto err
 del %1.lnk
