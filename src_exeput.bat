@@ -8,6 +8,7 @@ rem
 setlocal
 
 set private=
+if "%debug_vs%"=="true" set private=true
 if not "%~2"=="" (
   if not "%~2"=="private" (
     echo Bad argument "%~2".
