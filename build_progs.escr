@@ -13,6 +13,14 @@
 //
 subroutine repo
   dir [arg 1]
+
+  //   Avoid trying to build the ESCR program since it is in use and can't be
+  //   overwritten.
+  //
+  if [= [lnam [dir]] "escr"] then
+    return
+    endif
+
   if [exist "build_progs.bat" fnam] then
     show
     show "---REPOSITORY---  " [dir]

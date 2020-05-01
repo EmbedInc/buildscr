@@ -3,5 +3,21 @@
 //   Build all the host libraries and executable programs from all the GIT
 //   repositories in the SOURCE tree.
 //
-run "cmd /c build_libs"
-run "cmd /c build_progs"
+
+//   Set SCRDIR to the directory containing Embed scripts.
+//
+var new scrdir string = [tnam "(cog)bat"]
+if [not [exist scrdir fnam]] then
+  set scrdir [tnam "(cog)com"]
+  endif
+
+//   Make sure the latest versions of build scripts are in use.
+//
+dir go "(cog)source/buildscr"
+run "escr build"
+
+//   Build the linkable libraries, then the programs.
+//
+dir go "(cog)source"
+run "escr " scrdir "/build_libs"
+run "escr " scrdir "/build_progs"
