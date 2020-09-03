@@ -26,7 +26,7 @@ set comargs=%comargs% -mcpu=%pictype%
 set comargs=%comargs% -omf=elf
 set comargs=%comargs% -fomit-frame-pointer
 set comargs=%comargs% -mlarge-code -mlarge-data
-set comargs=%comargs% -mtext=.%2
+set comargs=%comargs% -mtext=.c_%2
 set comargs=%comargs% -Wall
 set comargs=%comargs% -mno-eds-warn
 set comargs=%comargs% -no-legacy-libc
