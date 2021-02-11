@@ -128,10 +128,10 @@ if [exist tnam fnam] then
   endif
 
 if [<> subd ""] then         //source subdirectory structure in use ?
-  set tnam [tnam "(cog)source/" srcname "/" subd "/win32/" lnam]	//try WIN32 version
+  set tnam [tnam "(cog)source/" srcname "/" subd "/win32/" lnam] //try WIN32 version
   if [not [exist tnam fnam]] then
     set tnam [tnam "(cog)source/" srcname "/" subd "/" lnam] //back to non-specific version
-		endif
+    endif
   set b [exist tnam fnam]    //source file exists in subdirectory ?
   if b then
     set fnam tnam            //source file is in the subdirectory
