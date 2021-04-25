@@ -9,7 +9,10 @@ rem   subdirectories.
 rem
 setlocal
 call godir (cog)src
+attrib -h -r /s
 if not "%~1"=="" cd "%~1"
+
+for /R %%a in (.vs) do (if exist "%%a" delt "%%a")
 
 for /R %%a in (*.asm *.aspic *.lkr *.obj) do (echo Deleting %%a & del %%a)
 for /R %%a in (*.pas *.cog *.c *.obj) do (echo Deleting %%a & del %%a)
