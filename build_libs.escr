@@ -40,7 +40,6 @@ subroutine subdirs
     if [= [dent] ".git"] then
       repeat
       endif
-    show [dent tnam]
     call repo [dent tnam] //process this subdirectory
     call subdirs:+1 [dent tnam]
     endloop
