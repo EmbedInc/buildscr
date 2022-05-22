@@ -1,9 +1,11 @@
-//   BUILD_LIBS
+//   BUILD_LIBS [srcdir]
 //
-//   Build all the host libraries from all the GIT repositories in the SOURCE
-//   tree.
+//   Build all the host libraries from all the GIT repositories in the directory
+//   SRCDIR within the Embed SOURCE directory.  When SRCDIR is not given, then
+//   the whole Embed SOURCE directory is searched.
 //
 var new nn integer = 0       //init number of repos built
+var new tnam string          //scratch pathname
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -29,6 +31,23 @@ subroutine repo
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+//   Subroutine SUBDIRS dir
+//
+//   Call REPO with any subdirectories in the tree DIR, except ".git".
+//
+subroutine subdirs
+  loop dir [arg 1] dir
+    if [= [dent] ".git"] then
+      repeat
+      endif
+    show [dent tnam]
+    call repo [dent tnam] //process this subdirectory
+    call subdirs:+1 [dent tnam]
+    endloop
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
 //   Subroutine DOTREE dir
 //
 //   Find and handle GIT repositories in the tree DIR.  DIR is a string.
@@ -37,6 +56,7 @@ subroutine dotree
   loop dir [arg 1] dir
     if [= [dent] ".git"]
       then
+        call subdirs [dent dir] //run scripts in any subdirectories
         call repo [dent dir] //process this repository
       else
         call dotree:+1 [dent tnam]
@@ -48,6 +68,16 @@ subroutine dotree
 //
 //   Start of main routine.
 //
+if [exist 1 arg] then        //search only a specific directory within SOURCE ?
+  set tnam [tnam "(cog)source/" [qstr [arg 1]]] //make full pathname of dir to search
+  if [not [exist tnam fnam]] then
+    show "No such directory within SOURCE"
+    stop 3
+    endif
+  call dotree tnam
+  stop
+  endif
+
 call repo "(cog)/source/sys"
 call repo "(cog)/source/util"
 call repo "(cog)/source/string"
