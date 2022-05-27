@@ -1,0 +1,193 @@
+//   SRC_PROGL prog
+//
+//   Build an executable from its source code.  The top level module must be
+//   named PROG.pas, and the resulting executable will be named PROG.exe.
+//
+//   This script is intended to be called from higher level build scripts.  It
+//   assumes the environment is set up for compiling source modules.  This
+//   usually means that BUILD_VARS and BUILD_PASINIT have already been called.
+//
+//   The program may include additional source modules.  These must be called
+//   PROG_xxx.pas or PROG_xxx.c.  All such modules will be compiled and a
+//   private library created from the result.  The object file from the top
+//   level source module will be linked against this library.
+//
+var new prog string = [unquote [qstr [arg 1]]] //program name
+var new plen integer = [slen prog] //string length of program name
+var new exe string           //EXE file leafname
+var new tnam string          //scratch treename
+var new lib bool             //private library exists
+var new cmd string           //command to execute
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Subroutine COMPILE fnam
+//
+//   Compile the indicated file.  The object file FNAM.obj will be created.  If
+//   the source file is in Pascal (.pas suffix), then the intermediate C file
+//   will be left if debugging is enabled.  FNAM must be a string, and represent
+//   a local file.
+//
+subroutine compile
+  var local fnam string = [vnl [arg 1]] //file name from argument
+  var local gnam string      //generic leafname
+  var local name string      //scratch name string
+  var local flen integer = [slen fnam] //string length of FNAM
+  var local cmd string       //command to execute
+
+  set name [lnam fnam]      //make leafname
+  if [<> name fnam] then
+    show "  Parameter """ fnam """ to COMPILE not leafname."
+    stop 3
+    endif
+  set gnam [lnam fnam ".pas" ".c"] //make generic leafname
+  if [= gnam fnam] then
+    show "  File """ fnam """ is not compilable (unrecognized suffix)."
+    stop 3
+    endif
+
+  set name [str gnam ".c"]   //delete files from previous builds, if any
+  if [exist name fnam] then
+    del file name
+    endif
+  set name [str gnam ".obj"]
+  if [exist name fnam] then
+    del file name
+    endif
+//
+//   Make C source if the original source is PAS.
+//
+  if [= [substr [- flen 3] 4 fnam] ".pas"] then //file name ends in ".pas" ?
+    run "sst " [qtk fnam] " -local_ins"
+    if [<> EXITSTATUS 0] then
+      stop
+      endif
+    endif
+//
+//   Compile the C file.
+//
+  set cmd [str "cmd /c compile_c " gnam] //init command to run
+  if [evar "debugging"] then
+    append cmd " -dbg"
+    endif
+  run cmd
+  if [<> EXITSTATUS 0] then
+    stop
+    endif
+
+  if [not [evar "debugging"]] then
+    del file [str gnam ".c"]
+    endif
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Start of main routine.
+//
+if [= [slen prog] 0] then
+  show "No program name supplied to SRC_PROGL script."
+  stop 3
+  endif
+show "Building program " [ucase prog]
+
+if [not [exist "srcdir" evar]] then
+  show "  Envrionment variable SRCDIR not defined."
+  stop 3
+  endif
+dir go [str "(cog)src/" [evar "srcdir"]] //go to the build directory
+
+set exe [str prog ".exe"]    //make sure EXE doesn't exist
+if [exist exe fnam] then
+  del file exe
+  endif
+//
+//   Grab the program include file, if it exists.
+//
+set tnam [tnam [evar "sourcedir"] "/" prog ".ins.pas"]
+if [exist tnam fnam] then
+  run "copya -in " [qtk tnam] //make local copy
+  if [<> EXITSTATUS 0] then
+    stop
+    endif
+  endif
+//
+//   Compile the top level module.
+//
+set tnam [tnam [evar "sourcedir"] "/" prog ".pas"] //source file full pathname
+run "copya -in " [qtk tnam]     //make local copy
+if [<> EXITSTATUS 0] then
+  stop
+  endif
+call compile [lnam tnam]
+//
+//   Create the private library if there are any private library files.
+//
+loop dir [evar "sourcedir"] file link //loop over the files in the source directory
+  var local g string         //generic leafname of directory entry
+  var local valid bool       //current entry is valid lib file name
+  var local l integer        //scratch string length
+  var local tnam string      //scratch treename
+
+  set g [lnam [dent] ".pas" ".c"] //make generic leafname
+  if [= g [dent]] then       //not one of the valid source code suffixes ?
+    repeat
+    endif
+  set l [slen g]             //make length of generic leafname
+  if [< l [+ plen 1]] then   //too short for PROG_x ?
+    repeat
+    endif
+  if [<> [substr 1 [+ plen 1] g] [str prog "_"]] then //doesn't start with "PROG_" ?
+    repeat
+    endif
+  set valid true             //init to name is valid
+  loop with ii from [+ plen 1] to l //scan remaining part of name
+    if [= [sindx ii g] "."] then
+      set valid false
+      quit
+      endif
+    endloop
+  if valid then              //this is a valid library source module ?
+    if [not lib] then        //first library module found ?
+      set lib true           //indicate there is a private library
+      writepush [str prog "_prog.mlist"]
+      endif
+    write g ".obj"
+    run "copya -in " [qtk [dent tnam]] //make local copy lib source file
+    if [<> EXITSTATUS 0] then
+      stop
+      endif
+    call compile [dent]
+    endif
+  endloop
+//
+//   Build the private library if there were any private modules.
+//
+if lib then                  //there was at least one private module ?
+  writepop                   //stop writing to .MLIST file
+  set cmd [str "cmd /c src_lib2 " prog "_prog " prog "_prog"]
+  run cmd
+  if [<> EXITSTATUS 0] then
+    stop
+    endif
+  endif
+//
+//   Link the object files to create the .EXE file.
+//
+set cmd [str "cmd /c src_link"] //start command line with program to run
+append cmd " " prog          //generic name of resulting executable
+append cmd " " prog          //generic name of top object file
+if lib then
+  append cmd " " prog "_prog.lib" //add private library, if it was created
+  endif
+run cmd                      //run the linker
+if [<> EXITSTATUS 0] then
+  stop
+  endif
+//
+//   Move the .EXE (and other associated files) to their proper places.
+//
+set cmd [str "cmd /c src_exeput " prog]
+run cmd
+if [<> EXITSTATUS 0] then
+  stop
+  endif
