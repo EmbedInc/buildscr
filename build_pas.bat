@@ -25,7 +25,7 @@ rem   GNAM is the generic leafname.
 sst "%tnam%" -out "%gnam%.c" -local_ins
 if errorlevel 1 goto :error
 
-call compile_c %gnam%
+call src_c_raw %gnam%
 if errorlevel 1 goto :eof
 del %gnam%.c
 
