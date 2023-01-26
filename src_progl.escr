@@ -39,7 +39,7 @@ subroutine compile
   var local flen integer = [slen fnam] //string length of FNAM
   var local cmd string       //command to execute
 
-  set name [lnam fnam]      //make leafname
+  set name [lnam fnam]       //make leafname
   if [<> name fnam] then
     show "  Parameter """ fnam """ to COMPILE not leafname."
     stop 3
@@ -62,7 +62,7 @@ subroutine compile
 //   Make C source if the original source is PAS.
 //
   if [= [substr [- flen 3] 4 fnam] ".pas"] then //file name ends in ".pas" ?
-    run "sst " [qtk fnam] " -local_ins"
+    run "sst " [qtk fnam]
     if [<> EXITSTATUS 0] then
       stop
       endif
@@ -102,33 +102,33 @@ subroutine lib_modules
     return
     endif
 
-  loop dir dnam file link      //loop over the files in the source directory
-    var local g string         //generic leafname of directory entry
-    var local valid bool       //current dir entry is valid private module
-    var local l integer        //scratch string length
-    var local tnam string      //scratch treename
+  loop dir dnam file link    //loop over the files in the source directory
+    var local g string       //generic leafname of directory entry
+    var local valid bool     //current dir entry is valid private module
+    var local l integer      //scratch string length
+    var local tnam string    //scratch treename
 
     set g [lnam [dent] ".pas" ".c"] //make generic leafname
-    if [= g [dent]] then       //not one of the valid source code suffixes ?
+    if [= g [dent]] then     //not one of the valid source code suffixes ?
       repeat
       endif
-    set l [slen g]             //make length of generic leafname
-    if [< l [+ plen 1]] then   //too short for PROG_x ?
+    set l [slen g]           //make length of generic leafname
+    if [< l [+ plen 1]] then //too short for PROG_x ?
       repeat
       endif
     if [<> [substr 1 [+ plen 1] g] [str prog "_"]] then //doesn't start with "PROG_" ?
       repeat
       endif
-    set valid true             //init to name is valid
+    set valid true           //init to name is valid
     loop with ii from [+ plen 1] to l //scan remaining part of name
       if [= [sindx ii g] "."] then //generic name contains "." ?
         set valid false
         quit
         endif
       endloop
-    if valid then              //this is a valid library source module ?
-      if [not lib] then        //first library module found ?
-        set lib true           //indicate there is a private library
+    if valid then            //this is a valid library source module ?
+      if [not lib] then      //first library module found ?
+        set lib true         //indicate there is a private library
         writepush [str prog "_prog.mlist"]
         endif
       write g ".obj"
@@ -187,7 +187,7 @@ if [exist tnam fnam] then
 //   Compile the top level module.
 //
 set tnam [tnam [evar "sourcedir"] "/" prog ".pas"] //source file full pathname
-run "copya -in " [qtk tnam]     //make local copy
+run "copya -in " [qtk tnam]  //make local copy
 if [<> EXITSTATUS 0] then
   stop
   endif
