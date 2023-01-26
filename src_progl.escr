@@ -149,6 +149,7 @@ if [= [slen prog] 0] then
   show "No program name supplied to SRC_PROGL script."
   stop 3
   endif
+show
 show "Building program " [ucase prog]
 
 if [not [exist "srcdir" evar]] then
