@@ -86,6 +86,63 @@ subroutine compile
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+//   Subroutine LIB_MODULES dnam
+//
+//   Check for and process private source modules for this program in the
+//   directory DNAM.  Nothing is done if DNAM does not exist.
+//
+//   The global variable LIB is set if a private library module is found.  If
+//   LIB is set on return of this routine, then a .MLIST file exists with the
+//   list of binary modules to include in the private library.
+//
+subroutine lib_modules
+  var local dnam string = [vnl [arg 1]]
+
+  if [not [exist dnam fnam]] then //no such directory ?
+    return
+    endif
+
+  loop dir dnam file link      //loop over the files in the source directory
+    var local g string         //generic leafname of directory entry
+    var local valid bool       //current dir entry is valid private module
+    var local l integer        //scratch string length
+    var local tnam string      //scratch treename
+
+    set g [lnam [dent] ".pas" ".c"] //make generic leafname
+    if [= g [dent]] then       //not one of the valid source code suffixes ?
+      repeat
+      endif
+    set l [slen g]             //make length of generic leafname
+    if [< l [+ plen 1]] then   //too short for PROG_x ?
+      repeat
+      endif
+    if [<> [substr 1 [+ plen 1] g] [str prog "_"]] then //doesn't start with "PROG_" ?
+      repeat
+      endif
+    set valid true             //init to name is valid
+    loop with ii from [+ plen 1] to l //scan remaining part of name
+      if [= [sindx ii g] "."] then //generic name contains "." ?
+        set valid false
+        quit
+        endif
+      endloop
+    if valid then              //this is a valid library source module ?
+      if [not lib] then        //first library module found ?
+        set lib true           //indicate there is a private library
+        writepush [str prog "_prog.mlist"]
+        endif
+      write g ".obj"
+      run "copya -in " [qtk [dent tnam]] //make local copy lib source file
+      if [<> EXITSTATUS 0] then
+        stop
+        endif
+      call compile [dent]
+      endif
+    endloop
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
 //   Start of main routine.
 //
 if [= [slen prog] 0] then
@@ -138,43 +195,11 @@ call compile [lnam tnam]
 //
 //   Create the private library if there are any private library files.
 //
-loop dir [evar "sourcedir"] file link //loop over the files in the source directory
-  var local g string         //generic leafname of directory entry
-  var local valid bool       //current entry is valid lib file name
-  var local l integer        //scratch string length
-  var local tnam string      //scratch treename
+set tnam [evar "sourcedir"]  //check for private modules in main dir
+call lib_modules tnam
 
-  set g [lnam [dent] ".pas" ".c"] //make generic leafname
-  if [= g [dent]] then       //not one of the valid source code suffixes ?
-    repeat
-    endif
-  set l [slen g]             //make length of generic leafname
-  if [< l [+ plen 1]] then   //too short for PROG_x ?
-    repeat
-    endif
-  if [<> [substr 1 [+ plen 1] g] [str prog "_"]] then //doesn't start with "PROG_" ?
-    repeat
-    endif
-  set valid true             //init to name is valid
-  loop with ii from [+ plen 1] to l //scan remaining part of name
-    if [= [sindx ii g] "."] then
-      set valid false
-      quit
-      endif
-    endloop
-  if valid then              //this is a valid library source module ?
-    if [not lib] then        //first library module found ?
-      set lib true           //indicate there is a private library
-      writepush [str prog "_prog.mlist"]
-      endif
-    write g ".obj"
-    run "copya -in " [qtk [dent tnam]] //make local copy lib source file
-    if [<> EXITSTATUS 0] then
-      stop
-      endif
-    call compile [dent]
-    endif
-  endloop
+set tnam [str [evar "sourcedir"] "/win32"] //try in system-specific dir
+call lib_modules tnam
 //
 //   Build the private library if there were any private modules.
 //
