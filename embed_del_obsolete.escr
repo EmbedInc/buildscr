@@ -1,0 +1,25 @@
+//   Remove files that might have been installed previously, but that should
+//   not be installed anymore.  This script is automatically run as part of the
+//   software installation process.  It may be run from the temporary UTIL
+//   directory that is deleted after software installation completes.
+//
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Subroutine DEL fnam
+//
+//   Delete the indicated file, if it is exists.
+//
+subroutine del
+  var local tnam string = [tnam [arg 1]]
+  if [exist tnam fnamnl] then
+    del tree tnam
+    endif
+  endsub
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//   Main program.
+//
+call del "(cog)bat/plotfilt.bat"
+call del "(cog)com/plotfilt.bat"
