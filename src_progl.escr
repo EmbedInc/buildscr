@@ -12,6 +12,9 @@
 //   private library created from the result.  The object file from the top
 //   level source module will be linked against this library.
 //
+//   If a private include file is used by the program and its modules, then it
+//   must be named <prog>_prog.ins.pas or <prog>.ins.pas.
+//
 var new prog string = [unquote [qstr [arg 1]]] //program name
 var new plen integer = [slen prog] //string length of program name
 var new exe string           //EXE file leafname
@@ -109,6 +112,14 @@ if [exist exe fnam] then
 //   Grab the program include file, if it exists.
 //
 set tnam [tnam [evar "sourcedir"] "/" prog ".ins.pas"]
+if [exist tnam fnam] then
+  run "copya -in " [qtk tnam] //make local copy
+  if [<> EXITSTATUS 0] then
+    stop
+    endif
+  endif
+
+set tnam [tnam [evar "sourcedir"] "/" prog "_prog.ins.pas"]
 if [exist tnam fnam] then
   run "copya -in " [qtk tnam] //make local copy
   if [<> EXITSTATUS 0] then
