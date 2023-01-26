@@ -18,6 +18,7 @@ var new exe string           //EXE file leafname
 var new tnam string          //scratch treename
 var new lib bool             //private library exists
 var new cmd string           //command to execute
+var new debugging bool = false //not a production build
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -67,7 +68,7 @@ subroutine compile
 //   Compile the C file.
 //
   set cmd [str "cmd /c src_c_raw " gnam] //init command to run
-  if [evar "debugging"] then
+  if debugging then
     append cmd " -dbg"
     endif
   run cmd
@@ -75,7 +76,7 @@ subroutine compile
     stop
     endif
 
-  if [not [evar "debugging"]] then
+  if [not debugging] then
     del file [str gnam ".c"]
     endif
   endsub
@@ -95,6 +96,10 @@ if [not [exist "srcdir" evar]] then
   stop 3
   endif
 dir go [str "(cog)src/" [evar "srcdir"]] //go to the build directory
+
+if [exist "debugging" evar] then
+  set debugging [evar "debugging"]
+  endif
 
 set exe [str prog ".exe"]    //make sure EXE doesn't exist
 if [exist exe fnam] then
