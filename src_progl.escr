@@ -1,4 +1,4 @@
-//   SRC_PROGL prog
+//   SRC_PROGL prog [options]
 //
 //   Build an executable from its source code.  The top level module must be
 //   named PROG.pas, and the resulting executable will be named PROG.exe.
@@ -15,13 +15,22 @@
 //   If a private include file is used by the program and its modules, then it
 //   must be named <prog>_prog.ins.pas or <prog>.ins.pas.
 //
+//   The command line options are:
+//
+//     -NOLIB
+//
+//       Do not build and link to a private library, whether source modules of
+//       the right name exist or not.
+//
 var new prog string = [unquote [qstr [arg 1]]] //program name
 var new plen integer = [slen prog] //string length of program name
 var new exe string           //EXE file leafname
 var new tnam string          //scratch treename
 var new lib bool             //private library exists
+var new nolib bool           //-NOLIB command line option used
 var new cmd string           //command to execute
 var new debugging bool = false //not a production build
+var new arg integer          //number of current command line argument
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -145,12 +154,30 @@ subroutine lib_modules
 //
 //   Start of main routine.
 //
+
+//   Handle command line arguments and environment state.  Argument 1 has
+//   already been read into PROG.
+//
 if [= [slen prog] 0] then
   show "No program name supplied to SRC_PROGL script."
   stop 3
   endif
 show
 show "Building program " [ucase prog]
+
+set arg 2                    //init next command line argument to get
+loop                         //back here each new command line keyword
+  if [not [exist arg arg]] then
+    quit
+    endif
+  pick one by [ucase [qstr [arg [1+ arg]]]]
+    option "-NOLIB"
+      set nolib true
+    optionelse
+      show "  SRC_PROGL passed unexpected option """ [pick] """."
+      stop 3
+    endpick
+  endloop
 
 if [not [exist "srcdir" evar]] then
   show "  Envrionment variable SRCDIR not defined."
@@ -196,11 +223,13 @@ call compile [lnam tnam]
 //
 //   Create the private library if there are any private library files.
 //
-set tnam [evar "sourcedir"]  //check for private modules in main dir
-call lib_modules tnam
+if [not nolib] then
+  set tnam [evar "sourcedir"]  //check for private modules in main dir
+  call lib_modules tnam
 
-set tnam [str [evar "sourcedir"] "/win32"] //try in system-specific dir
-call lib_modules tnam
+  set tnam [str [evar "sourcedir"] "/win32"] //try in system-specific dir
+  call lib_modules tnam
+  endif
 //
 //   Build the private library if there were any private modules.
 //
