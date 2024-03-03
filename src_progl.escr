@@ -22,12 +22,18 @@
 //       Do not build and link to a private library, whether source modules of
 //       the right name exist or not.
 //
+//     -LINK fnam
+//
+//       Add the file FNAM directly as an additional file to link with the
+//       program.
+//
 var new prog string = [unquote [qstr [arg 1]]] //program name
 var new plen integer = [slen prog] //string length of program name
 var new exe string           //EXE file leafname
 var new tnam string          //scratch treename
 var new lib bool             //private library exists
 var new nolib bool           //-NOLIB command line option used
+var new link string          //list of additional files to link, leading spaces
 var new cmd string           //command to execute
 var new debugging bool = false //not a production build
 var new arg integer          //number of current command line argument
@@ -173,6 +179,8 @@ loop                         //back here each new command line keyword
   pick one by [ucase [qstr [arg [1+ arg]]]]
     option "-NOLIB"
       set nolib true
+    option "-LINK"
+      append link " " [qstr [arg [1+ arg]]]
     optionelse
       show "  SRC_PROGL passed unexpected option """ [pick] """."
       stop 3
@@ -249,6 +257,9 @@ append cmd " " prog          //generic name of resulting executable
 append cmd " " prog          //generic name of top object file
 if lib then
   append cmd " " prog "_prog.lib" //add private library, if it was created
+  endif
+if [<> link ""] then         //have additional files to link ?
+  append cmd link
   endif
 run cmd                      //run the linker
 if [<> EXITSTATUS 0] then
