@@ -4,17 +4,17 @@
 //   repositories in the SOURCE tree.
 //
 
+//   Make sure the latest versions of build scripts are in use.
+//
+dir go "(cog)source/buildscr"
+run "escr build"
+
 //   Set SCRDIR to the directory containing Embed scripts.
 //
 var new scrdir string = [tnam "(cog)bat"]
 if [not [exist scrdir fnam]] then
   set scrdir [tnam "(cog)com"]
   endif
-
-//   Make sure the latest versions of build scripts are in use.
-//
-dir go "(cog)source/buildscr"
-run "escr build"
 
 //   Build the linkable libraries, then the programs.
 //

@@ -7,7 +7,8 @@
 var new destdir string       //destination directory
 var new dest string          //destination file name
 var new gnam string          //generic name of file
-
+var new handled bool         //directory entry was handled
+//
 //   Set DESTDIR to the destination directory.  This will be the Embed BAT
 //   directory if it exists, otherwise the Embed COM directory.
 //
@@ -19,7 +20,11 @@ if [not [exist destdir fnam]] then
     stop 3
     endif
   endif
-
+//
+//   Make sure the Embed LIB directory exists.
+//
+dir exist [tnam "(cog)lib"]
+//
 //   Loop thru all the files in this directory.  Install all ".bat" and ".escr"
 //   files.
 //
@@ -32,6 +37,18 @@ loop dir "." file
     repeat
     endif
   //
+  //   Handle files that require special processing.
+  //
+  set handled true
+  pick one by [dent]
+
+  optionelse
+    set handled false
+    endpick
+  if handled then
+    repeat
+    endif
+  //
   //   Ignore this file if not .BAT or .ESCR.
   //
   set gnam [lnam [dent] ".bat" ".escr"]
@@ -39,7 +56,8 @@ loop dir "." file
     repeat
     endif
   //
-  //   Install this file.
+  //   Install this file into the BAT or COM directory, as appropriate for
+  //   scripts on this machine.
   //
   set dest [str destdir "/" [dent]] //make destination file name
   if [exist dest fnam] then  //destination file already exists ?

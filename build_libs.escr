@@ -82,5 +82,8 @@ call repo "(cog)/source/util"
 call repo "(cog)/source/string"
 call repo "(cog)/source/file"
 call repo "(cog)/source/stuff"
+call repo "(cog)/source/fline"
+call repo "(cog)/source/syo"
+call repo "(cog)/source/syn"
 
 call dotree "(cog)source"
