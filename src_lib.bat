@@ -27,7 +27,7 @@ setlocal
 set no-dll=true
 call treename_var "(cog)source/%~1" source
 
-if exist "%source%\%~2_lib.mlist" (
+if exist "%sourcedir%\%~2_lib.mlist" (
     call src_get %~1 %~2_lib.mlist
   ) else (
     call src_get %~1 %~2.mlist
