@@ -34,21 +34,20 @@ rem
 :put_global
 copyt %1.exe (cog)com/%1.exe
 
-if exist "z:\embed\com" copyt "%1.exe" "z:\embed\com\%1.exe"
-if exist "y:\embed\com" copyt "%1.exe" "y:\embed\com\%1.exe"
 del %1.exe
 if exist "%homedrive%%homepath%\com_dbg\%1.exe" del "%homedrive%%homepath%\com_dbg\%1.exe"
 
 call treename_var "%sourcedir%/%1.txt" tnam
-if not exist "%tnam%" goto :done_doc
+if not exist "%tnam%" goto :done_txt
 copya "%tnam%" "(cog)doc/%1.txt"
-if exist "z:\embed\doc" copya "%tnam%" "z:\embed\doc\%1.txt"
-if exist "y:\embed\doc" copya "%tnam%" "y:\embed\doc\%1.txt"
-:done_doc
+:done_txt
+
+call treename_var "%sourcedir%/%1.htm" tnam
+if not exist "%tnam%" goto :done_htm
+copya "%tnam%" "(cog)doc/%1.htm"
+:done_htm
 
 call treename_var "%sourcedir%/%1_prog.msg" tnam
 if not exist "%tnam%" goto :done_msg
 copya "%tnam%" "(cog)env/%1_prog.msg"
-if exist "z:\embed\env" copya "%tnam%" "z:\embed\env\%1_prog.msg"
-if exist "y:\embed\env" copya "%tnam%" "y:\embed\env\%1_prog.msg"
 :done_msg
